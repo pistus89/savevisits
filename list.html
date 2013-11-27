@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+
+<head>
+	<title>listview</title>
+	<script type="text/javascript" src="jquery-1.10.2.js"></script>
+	<script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+	<script>
+		
+		var listx = JSON.parse(localStorage.getItem("Xlist"));
+		var listy = JSON.parse(localStorage.getItem("Ylist"));
+		var names = JSON.parse(localStorage.getItem("names"));
+		console.log("lenght is " + names.length);
+
+		$(document).ready(function(){
+			$("#back").click(function(){
+				window.location='index.html';
+			});
+			
+			for(var i = 0; i<names.length; i++) {
+				console.log("row" + i + ": " + names[i]);
+				$("#hello").append("<p> Name: " + names[i] + " x: " + listx[i] + " y: " + listy[i] + "</p>");
+			} 
+		});
+		
+
+	</script>
+
+</head>
+
+
+<body>
+	<div id="back">back to main page</div>
+	<div id="clear">hello!</div>
+</body>
+
+</html>
