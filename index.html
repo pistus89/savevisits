@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Device Properties Example</title>
+    <script type="text/javascript" src="jquery-1.10.2.js"></script>
+    <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+    <script type="text/javascript" src="jquery.exif.js"></script>
+    <script type="text/javascript" charset="utf-8">
+	$(document).ready(function(){
+		
+		var currentLat;
+		var currentLong;
+
+		//var watch = navigator.geolocation.watchPosition(watchSuccess,error,{
+			//	  enableHighAccuracy: true, 
+              //                    timeout: 60000,
+                //                  maximumAge: 60000});	
+		
+		//window.localStorage.clear();
+		var listx = new Array();
+		var listy = new Array();
+		var listnames = new Array();
+		if (window.localStorage.getItem("Xlist") == null) {
+			listx = new Array();	
+			window.localStorage.setItem("Xlist", JSON.stringify(listx));
+			listy = new Array();
+			window.localStorage.setItem("Ylist", JSON.stringify(listy));
+			listnames = new Array();
+			window.localStorage.setItem("names", JSON.stringify(listnames));
+			alert("arrays created successfully!");
+		}
+
+		function watchSuccess(position) {
+			//if getlocation fails, coordinates can be saved by last known location
+			currentLat = position.coords.latitude;
+			currentLong = position.coords.longitude;
+		}
+		function success(position) {
+			var latitude = position.coords.latitude;
+			var longitude = position.coords.longitude;
+			
+			console.log("lat: " + latitude);
+			console.log("long: " + longitude);
+			
+			window.localStorage.setItem("latestY", longitude);
+			window.localStorage.setItem("latestX", latitude);
+		}
+		
+		function error() {
+			alert(error.code);
+		}
+
+		$("#deviceProperties").click(function(){
+			listx = JSON.parse(window.localStorage.getItem("Xlist"));
+			listy = JSON.parse(window.localStorage.getItem("Ylist"));
+			listnames = JSON.parse(window.localStorage.getItem("names"));			
+			
+			var place = listnames.length - 1;
+			var person=prompt("Please name your location:","defaultName");
+						
+			navigator.geolocation.getCurrentPosition(success, error, {
+				  enableHighAccuracy: true,
+				  timeout: 60000,
+				  maximumAge: 60000});			
+
+			console.log("index is" + place);
+			if (place < 0) {
+				place = 0;
+			}
+			listnames[place] = "derp";
+			listx[place] = 0.944;
+			listy[place] = 0.1337;
+			
+			listnames[place + 1] = person;
+			listx[place + 1] = window.localStorage.getItem("latestX");
+			listy[place + 1] = window.localStorage.getItem("latestY");
+			
+			window.localStorage.setItem("Xlist", JSON.stringify(listx));
+			window.localStorage.setItem("Ylist", JSON.stringify(listy));
+			window.localStorage.setItem("names", JSON.stringify(listnames));
+			console.log(window.localStorage.getItem("names"));
+			window.location='list.html';
+		});
+		
+		function handleFileSelect(evt) {
+		    var files = evt.target.files; // FileList object
+
+		    // files is a FileList of File objects. List some properties.
+		    var output = [];
+		    for (var i = 0, f; f = files[i]; i++) {
+		      	var Longitude = $(f).exif("GPSLongitude");
+		      	var Latitude = $(f).exif("GPSLatitude");
+		    	output.push("" + f.name + "," + Longitude + "," + Latitude);
+		    }
+		    
+		    window.localStorage.setItem("pictures", JSON.stringify(output));
+		    alert(output.length + " pictures uploaded successfully");
+		    
+		}
+		
+		
+		
+		$("imageLocations").click(function(){
+			listx = JSON.parse(window.localStorage.getItem("Xlist"));
+			listy = JSON.parse(window.localStorage.getItem("Ylist"));
+			listnames = JSON.parse(window.localStorage.getItem("names"));
+			var pictures = JSON.parse(window.localStorage.getItem("pictures"));
+			
+			var place;
+			
+			for (int i = 0; var f = pictures[i]; i++) {
+				var raw = f.split(",");
+				listnames.push(raw[0]);
+				listy.push(raw[1]);
+				listx.push(raw[2]);
+			}
+			
+			window.localStorage.setItem("Xlist", JSON.stringify(listx));
+			window.localStorage.setItem("Ylist", JSON.stringify(listy));
+			window.localStorage.setItem("names", JSON.stringify(listnames));
+			window.location='list.html';
+			
+			
+			
+		});
+		
+		document.getElementById('files').addEventListener('change', handleFileSelect, false);
+	}); 
+
+    </script>
+  </head>
+  <body>
+    <p id="deviceProperties">getLocation</p>
+    <div id="name"></div>
+    <div id="imageLocations">getPictureLocations</div>
+    <br>
+    <input type="file" id="files" name="files[]" multiple />
+	<output id="list"></output>
+  </body>
+</html>
